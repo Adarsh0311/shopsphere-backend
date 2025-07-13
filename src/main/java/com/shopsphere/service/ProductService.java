@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors; // New import for stream.collect
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +51,7 @@ public class ProductService {
     public List<ProductResponse> getAllProducts() {
         return productRepository.findAll().stream()
                 .map(this::convertToDto) // Use method reference for mapping
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -154,7 +153,7 @@ public class ProductService {
         }
         return productRepository.findByPriceBetween(minPrice, maxPrice).stream()
                 .map(this::convertToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -172,6 +171,6 @@ public class ProductService {
         return productRepository.findByStockQuantityLessThanEqual(threshold).stream()
                 .filter(p -> p.getStockQuantity() <= threshold)
                 .map(this::convertToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 }
