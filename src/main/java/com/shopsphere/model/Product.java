@@ -36,10 +36,10 @@ public class Product {
     @Column(name = "image_url")
     private String imageUrl;
 
-    // Will be a foreign key to Category later, but for now we'll keep it simple
-    // @ManyToOne
-    // @JoinColumn(name = "category_id")
-    // private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id") //specifies foreign key column
+    private Category category;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
