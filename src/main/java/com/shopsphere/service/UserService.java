@@ -1,5 +1,6 @@
 package com.shopsphere.service;
 
+import com.shopsphere.config.CustomUserDetails;
 import com.shopsphere.dto.JwtAuthResponse;
 import com.shopsphere.dto.LoginRequest;
 import com.shopsphere.dto.RegisterRequest;
@@ -18,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -66,18 +69,16 @@ public class UserService {
         SecurityContextHolder.getContext().setAuthentication(authenticate);
 
         // Generate JWT token
-        UserDetails userDetails = (UserDetails) authenticate.getPrincipal();
-        String jwt = jwtService.generateToken(userDetails); // Use username from authentication
-        // Retrieve the full User object to get userId, email etc. for the response
-        User user = findByUsername(authenticate.getName());
+        CustomUserDetails customUserDetails = (CustomUserDetails) authenticate.getPrincipal();
+        String jwt = jwtService.generateToken(customUserDetails); // Use username from authentication
 
 
         return new JwtAuthResponse(
                 jwt,
                 "Bearer",
-                user.getUserId(),
-                user.getUsername(),
-                user.getEmail()
+                customUserDetails.getUserId(),
+                customUserDetails.getUsername(),
+                customUserDetails.getEmail()
         );
     }
 
@@ -92,6 +93,10 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with username: " + username));
     }
 
-    // We'll add login logic later in AuthController, after JWT utility.
-    // For now, this service handles user persistence and retrieval.
+    @Transactional(readOnly = true)
+    public User findById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with userId: " + userId));
+    }
+
 }

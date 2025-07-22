@@ -50,16 +50,18 @@ public class SecurityConfig {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUsername())
-                    .password(user.getPassword())
-                    .authorities(
-                            user
-                                    .getRoles()
-                                    .stream()
-                                    .map(role -> new SimpleGrantedAuthority(role.getName()))
-                                    .collect(Collectors.toSet())
-                    ).build();
+//            return org.springframework.security.core.userdetails.User.builder()
+//                    .username(user.getUsername())
+//                    .password(user.getPassword())
+//                    .authorities(
+//                            user
+//                                    .getRoles()
+//                                    .stream()
+//                                    .map(role -> new SimpleGrantedAuthority(role.getName()))
+//                                    .collect(Collectors.toSet())
+//                    ).build();
+
+            return new CustomUserDetails(user);
         };
     }
 

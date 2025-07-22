@@ -1,5 +1,6 @@
 package com.shopsphere.service;
 
+import com.shopsphere.config.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -31,6 +32,10 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public String extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId",  String.class));
+    }
+
     /**
      * Extracts a specific claim from a JWT token.
      */
@@ -42,12 +47,17 @@ public class JwtService {
     /**
      * Generates a JWT token for a given UserDetails.
      */
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+
+    public String generateToken(CustomUserDetails customUserDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        return generateToken(claims, customUserDetails);
     }
 
     /**
-     * Generates a JWT token with extra claims.
+     * Generates a JWT token with extra claims, including userId.
+     * @param extraClaims Additional claims to include.
+     * @param userDetails The authenticated user's details (expected to be CustomUserDetails).
+     * @return The generated JWT token string.
      */
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts

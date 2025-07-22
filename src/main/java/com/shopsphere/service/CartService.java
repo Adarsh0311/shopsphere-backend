@@ -87,10 +87,13 @@ public class CartService {
      */
     @Transactional
     public Cart getOrCreateCart(String userId) {
-        User user = userService.findByUsername(userId); // Assuming userId here is actually the username from SecurityContextHolder
+        //User user = userService.findByUsername(userId); // Assuming userId here is actually the username from SecurityContextHolder
         // In a real app, you'd likely fetch by userId, not username for cart linking.
         // If the principal is the actual userId (UUID string), use userRepository.findById(userId) instead.
         // For now, let's assume `userId` passed here is the username.
+
+        User user = new User();
+        user.setUserId(userId);
 
         return cartRepository.findByUser(user)
                 .orElseGet(() -> {

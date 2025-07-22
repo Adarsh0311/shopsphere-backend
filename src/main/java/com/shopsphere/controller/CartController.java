@@ -1,5 +1,6 @@
 package com.shopsphere.controller;
 
+import com.shopsphere.config.CustomUserDetails;
 import com.shopsphere.dto.AddToCartRequest;
 import com.shopsphere.dto.CartResponse;
 import com.shopsphere.service.CartService;
@@ -23,11 +24,11 @@ public class CartController {
      * @return The CartResponse DTO.
      */
     @GetMapping
-    public ResponseEntity<CartResponse> getUserCart(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<CartResponse> getUserCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
         // Extract username (or userId if you mapped it) from UserDetails
         // For simplicity, we'll use username from UserDetails as userId in CartService for now.
         // In production, ensure this is the actual userId (UUID) if that's how you link carts to users.
-        CartResponse cart = cartService.getCartByUserId(userDetails.getUsername());
+        CartResponse cart = cartService.getCartByUserId(userDetails.getUserId());
         return ResponseEntity.ok(cart);
     }
 
@@ -39,9 +40,9 @@ public class CartController {
      */
     @PostMapping("/add")
     public ResponseEntity<CartResponse> addProductToCart(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody AddToCartRequest request) {
-        CartResponse cart = cartService.addProductToCart(userDetails.getUsername(), request);
+        CartResponse cart = cartService.addProductToCart(userDetails.getUserId(), request);
         return ResponseEntity.status(HttpStatus.OK).body(cart); // Use OK for updates/adds to existing resource
     }
 
@@ -54,10 +55,10 @@ public class CartController {
      */
     @PutMapping("/update-quantity/{productId}")
     public ResponseEntity<CartResponse> updateProductQuantity(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String productId,
             @RequestParam Integer quantity) {
-        CartResponse cart = cartService.updateProductQuantityInCart(userDetails.getUsername(), productId, quantity);
+        CartResponse cart = cartService.updateProductQuantityInCart(userDetails.getUserId(), productId, quantity);
         return ResponseEntity.ok(cart);
     }
 
@@ -69,9 +70,9 @@ public class CartController {
      */
     @DeleteMapping("/remove/{productId}")
     public ResponseEntity<CartResponse> removeProductFromCart(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable String productId) {
-        CartResponse cart = cartService.removeProductFromCart(userDetails.getUsername(), productId);
+        CartResponse cart = cartService.removeProductFromCart(userDetails.getUserId(), productId);
         return ResponseEntity.ok(cart); // Return updated cart for client to refresh
     }
 
@@ -81,8 +82,8 @@ public class CartController {
      * @return The cleared CartResponse DTO.
      */
     @DeleteMapping("/clear")
-    public ResponseEntity<CartResponse> clearCart(@AuthenticationPrincipal UserDetails userDetails) {
-        CartResponse cart = cartService.clearCart(userDetails.getUsername());
+    public ResponseEntity<CartResponse> clearCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        CartResponse cart = cartService.clearCart(userDetails.getUserId());
         return ResponseEntity.ok(cart);
     }
 }
