@@ -1,4 +1,4 @@
-package com.shopsphere.config.security.jwt;
+package com.shopsphere.config.security;
 
 import com.shopsphere.service.JwtService;
 import jakarta.servlet.FilterChain;
