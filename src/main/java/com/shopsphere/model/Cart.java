@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -24,12 +25,14 @@ public class Cart {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
+    @ToString.Exclude
     private User user; // Can be null for guest carts initially
 
 
 
     // We'll handle cascading manually in the service layer for more control, or use DTOs
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Set<CartItem> cartItems = new HashSet<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)

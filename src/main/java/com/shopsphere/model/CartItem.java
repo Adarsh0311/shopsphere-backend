@@ -1,9 +1,7 @@
 package com.shopsphere.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,11 +11,13 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "cart_item_id", updatable = false, nullable = false)
+    @EqualsAndHashCode.Include
     private String cartItemId;
 
     @ManyToOne(fetch = FetchType.LAZY)

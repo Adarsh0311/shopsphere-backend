@@ -1,0 +1,88 @@
+package com.shopsphere.controller;
+
+import com.shopsphere.dto.AddToCartRequest;
+import com.shopsphere.dto.CartResponse;
+import com.shopsphere.service.CartService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+
+@RestController
+@RequestMapping("/api/cart")
+@RequiredArgsConstructor
+public class CartController {
+
+    private final CartService cartService;
+
+    /**
+     * GET /api/cart : Get the authenticated user's cart.
+     * @param userDetails The authenticated user's details.
+     * @return The CartResponse DTO.
+     */
+    @GetMapping
+    public ResponseEntity<CartResponse> getUserCart(@AuthenticationPrincipal UserDetails userDetails) {
+        // Extract username (or userId if you mapped it) from UserDetails
+        // For simplicity, we'll use username from UserDetails as userId in CartService for now.
+        // In production, ensure this is the actual userId (UUID) if that's how you link carts to users.
+        CartResponse cart = cartService.getCartByUserId(userDetails.getUsername());
+        return ResponseEntity.ok(cart);
+    }
+
+    /**
+     * POST /api/cart/add : Add a product to the authenticated user's cart.
+     * @param userDetails The authenticated user's details.
+     * @param request The AddToCartRequest DTO.
+     * @return The updated CartResponse DTO.
+     */
+    @PostMapping("/add")
+    public ResponseEntity<CartResponse> addProductToCart(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody AddToCartRequest request) {
+        CartResponse cart = cartService.addProductToCart(userDetails.getUsername(), request);
+        return ResponseEntity.status(HttpStatus.OK).body(cart); // Use OK for updates/adds to existing resource
+    }
+
+    /**
+     * PUT /api/cart/update-quantity/{productId} : Update quantity of a product in the authenticated user's cart.
+     * @param userDetails The authenticated user's details.
+     * @param productId The ID of the product.
+     * @param quantity The new quantity.
+     * @return The updated CartResponse DTO.
+     */
+    @PutMapping("/update-quantity/{productId}")
+    public ResponseEntity<CartResponse> updateProductQuantity(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String productId,
+            @RequestParam Integer quantity) {
+        CartResponse cart = cartService.updateProductQuantityInCart(userDetails.getUsername(), productId, quantity);
+        return ResponseEntity.ok(cart);
+    }
+
+    /**
+     * DELETE /api/cart/remove/{productId} : Remove a product from the authenticated user's cart.
+     * @param userDetails The authenticated user's details.
+     * @param productId The ID of the product to remove.
+     * @return The updated CartResponse DTO.
+     */
+    @DeleteMapping("/remove/{productId}")
+    public ResponseEntity<CartResponse> removeProductFromCart(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String productId) {
+        CartResponse cart = cartService.removeProductFromCart(userDetails.getUsername(), productId);
+        return ResponseEntity.ok(cart); // Return updated cart for client to refresh
+    }
+
+    /**
+     * DELETE /api/cart/clear : Clear all items from the authenticated user's cart.
+     * @param userDetails The authenticated user's details.
+     * @return The cleared CartResponse DTO.
+     */
+    @DeleteMapping("/clear")
+    public ResponseEntity<CartResponse> clearCart(@AuthenticationPrincipal UserDetails userDetails) {
+        CartResponse cart = cartService.clearCart(userDetails.getUsername());
+        return ResponseEntity.ok(cart);
+    }
+}

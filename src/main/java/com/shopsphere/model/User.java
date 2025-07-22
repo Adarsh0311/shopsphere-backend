@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -47,6 +48,7 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"), // Foreign key from 'users' table in join table
         inverseJoinColumns = @JoinColumn(name = "role_id") // Foreign key from 'roles' table in join table
     )
+    @ToString.Exclude
     private Set<Role> roles = new HashSet<>();
 
     @Column(name = "registration_date", nullable = false, updatable = false)

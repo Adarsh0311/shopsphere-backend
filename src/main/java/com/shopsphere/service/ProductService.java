@@ -66,6 +66,13 @@ public class ProductService {
         return convertToDto(product);
     }
 
+    // --- for internal use ---
+    @Transactional(readOnly = true)
+    Product getProductEntityById(String productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with ID: " + productId));
+    }
+
     /**
      * Creates a new product from DTO.
      * @param request The ProductRequest DTO.
