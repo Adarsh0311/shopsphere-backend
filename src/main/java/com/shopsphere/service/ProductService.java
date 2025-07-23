@@ -180,4 +180,9 @@ public class ProductService {
                 .map(this::convertToDto)
                 .toList();
     }
+
+    @Transactional
+    public int updateProductStockQuantity(String productId, Integer stockQuantity) {
+        return productRepository.updateProductStockQuantity(productId, stockQuantity);
+    }
 }
