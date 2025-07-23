@@ -33,8 +33,8 @@ public class OrderController {
             @RequestBody PlaceOrderRequest request) {
         OrderResponse createdOrder = orderService.placeOrder(userDetails.getUserId(), request);
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/{id}")
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/orders/{id}")
                 .buildAndExpand(createdOrder.getOrderId())
                 .toUri();
 

@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopsphere.dto.OrderItemResponse;
 import com.shopsphere.dto.OrderResponse;
 import com.shopsphere.dto.PlaceOrderRequest;
+import com.shopsphere.event.OrderPlacedEvent;
 import com.shopsphere.model.*;
 import com.shopsphere.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,11 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Service for creating orders, updating stocks and publishing messages to SQS.
@@ -39,8 +37,8 @@ public class OrderService {
     private final UserService userService;
     private final AddressRepository addressRepository;
     private final PaymentRepository paymentRepository;
-    private final SqsMessageSenderService sqsMessageSenderService;
-    private final ObjectMapper objectMapper; // To convert objects to JSON for SQS
+
+    private final ApplicationEventPublisher eventPublisher;
 
 
     /**
@@ -98,20 +96,24 @@ public class OrderService {
         cart.setUpdatedAt(LocalDateTime.now());
         cartRepository.save(cart);
 
-        //sending the message to SQS queue for async processing
-        try {
-            String orderJson = objectMapper.writeValueAsString(convertToOrderDto(newOrder));
-            //this is async processing
-            sqsMessageSenderService.sendOrderProcessingMessage(orderJson);
-            log.info("sent order processing message {}", orderJson);
-        } catch (Exception e) {
-            log.error("sent order processing error {}", e.getMessage());
-            //TODO: implement retry mechanism
-            //throw new RuntimeException(e);
-        }
+//        //sending the message to SQS queue for async processing
+//        try {
+//            String orderJson = objectMapper.writeValueAsString(convertToOrderDto(newOrder));
+//            //this is async processing
+//            sqsMessageSenderService.sendOrderProcessingMessage(orderJson);
+//            log.info("sent order processing message {}", orderJson);
+//        } catch (Exception e) {
+//            log.error("sent order processing error {}", e.getMessage());
+//            //TODO: implement retry mechanism
+//            //throw new RuntimeException(e);
+//        }
 
-        return convertToOrderDto(savedOrder);
 
+        OrderResponse orderResponse = convertToOrderDto(savedOrder);
+        eventPublisher.publishEvent(new OrderPlacedEvent(this, orderResponse));
+        log.info("OrderPlacedEvent published for order ID: {}", savedOrder.getOrderId());
+
+        return orderResponse;
     }
 
     /**
@@ -160,9 +162,6 @@ public class OrderService {
         log.info("Order ID {} status updated to: {}", orderId, newStatus);
         return convertToOrderDto(updatedOrder);
     }
-
-
-
 
     private Cart getUserCart(User user) {
         Cart cart = cartRepository.findByUser(user)
