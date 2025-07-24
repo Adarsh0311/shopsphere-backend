@@ -1,0 +1,5 @@
+ Payment Method ID              Description
+
+ pm_card_visa                   Visa - success
+ pm_card_mastercard             MasterCard - success
+ pm_card_visa_chargeDeclined    Simulates declined card
