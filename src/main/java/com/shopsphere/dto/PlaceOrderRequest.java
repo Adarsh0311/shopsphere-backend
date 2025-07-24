@@ -22,5 +22,5 @@ public class PlaceOrderRequest {
 
     // TODO: integrate with a payment gateway
     private String paymentMethod; // CREDIT_CARD, PAYPAL
-    private String transactionId; // Unique ID from payment gateway (simulated for now)
+    private String paymentMethodToken; //token from payment gateway (stripe)
 }

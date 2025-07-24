@@ -25,9 +25,6 @@ public class CartController {
      */
     @GetMapping
     public ResponseEntity<CartResponse> getUserCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        // Extract username (or userId if you mapped it) from UserDetails
-        // For simplicity, we'll use username from UserDetails as userId in CartService for now.
-        // In production, ensure this is the actual userId (UUID) if that's how you link carts to users.
         CartResponse cart = cartService.getCartByUserId(userDetails.getUserId());
         return ResponseEntity.ok(cart);
     }

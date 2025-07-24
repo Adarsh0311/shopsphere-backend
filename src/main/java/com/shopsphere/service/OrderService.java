@@ -8,8 +8,13 @@ import com.shopsphere.model.*;
 import com.shopsphere.model.enums.OrderStatus;
 import com.shopsphere.model.enums.PaymentStatus;
 import com.shopsphere.repository.*;
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
+import com.stripe.param.ChargeCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,9 +43,7 @@ public class OrderService {
     private final UserService userService;
     private final AddressRepository addressRepository;
     private final PaymentRepository paymentRepository;
-
     private final ApplicationEventPublisher eventPublisher;
-
 
     /**
      * Place a new order from the user's cart.
@@ -84,18 +87,17 @@ public class OrderService {
         newOrder.setShippingAddress(shippingAddress); //CascadeType.ALL on Order ensures it's saved
 
         //Handle Payment Details
-        Payment payment = getPayment(placeOrderRequest, totalAmount);
-
-        newOrder.setPayment(payment);
+        processPayment(user, newOrder,placeOrderRequest, totalAmount);
 
         //all changes within this transaction will be commited
         Order savedOrder = orderRepository.save(newOrder);
-
+        log.info("Order placed successfully with ID: {}", savedOrder.getOrderId());
         //clear the user's cart
         cartItemRepository.deleteAll(cart.getCartItems());
         cart.getCartItems().clear();
         cart.setUpdatedAt(LocalDateTime.now());
         cartRepository.save(cart);
+        log.info("Cart cleared for user ID: {}", user.getUserId());
 
 //        //sending the message to SQS queue for async processing
 //        try {
@@ -108,7 +110,6 @@ public class OrderService {
 //            //TODO: implement retry mechanism
 //            //throw new RuntimeException(e);
 //        }
-
 
         OrderResponse orderResponse = convertToOrderDto(savedOrder);
         eventPublisher.publishEvent(new OrderPlacedEvent(this, orderResponse));
@@ -186,14 +187,49 @@ public class OrderService {
         return orderItem;
     }
 
-    private static Payment getPayment(PlaceOrderRequest placeOrderRequest, BigDecimal totalAmount) {
+    private static void processPayment(User user, Order newOrder, PlaceOrderRequest placeOrderRequest, BigDecimal totalAmount) {
         Payment payment = new Payment();
         payment.setAmount(totalAmount);
         payment.setPaymentMethod(placeOrderRequest.getPaymentMethod());
-        //TODO: implement payment gateway and fetch transaction id from there
-        payment.setTransactionId(placeOrderRequest.getTransactionId()); //it would come from payment gateway
-        payment.setStatus(PaymentStatus.COMPLETED); //for now
-        return payment;
+
+        try {
+            //because stripe requires amount in cents
+            long amountInCents = totalAmount.multiply(BigDecimal.valueOf(100)).longValueExact();
+
+            ChargeCreateParams params = ChargeCreateParams.builder()
+                    .setAmount(amountInCents)
+                    .setCurrency("usd")
+                    .setSource(placeOrderRequest.getPaymentMethodToken()) //token from frontend
+                    .setReceiptEmail(user.getEmail())
+                    .build();
+
+            Charge charge = Charge.create(params); //api call to stripe
+
+            payment.setTransactionId(charge.getId()); //ID from stripe
+
+            if ("succeeded".equalsIgnoreCase(charge.getStatus())) {
+                payment.setStatus(PaymentStatus.COMPLETED);
+                newOrder.setStatus(OrderStatus.PROCESSING); //update order status on successful payment
+
+            } else if ("pending".equalsIgnoreCase(charge.getStatus())) {
+                payment.setStatus(PaymentStatus.PENDING);
+
+            } else {
+                payment.setStatus(PaymentStatus.FAILED);
+                log.error("Stripe charge failed or has unexpected status for order {}: Status - {}", newOrder.getOrderId(), charge.getStatus());
+                throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, "Payment failed " + charge.getFailureMessage());
+            }
+
+            log.info("Stripe charge processed for order {}. Charge ID: {}, Status: {}", newOrder.getOrderId(), charge.getId(), charge.getStatus());
+
+        } catch (StripeException e) {
+            log.error("Stripe API call error during order {}: {}", newOrder.getOrderId(), e.getMessage());
+            throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, "Payment processing failed: " + e.getMessage());
+        }  catch (ArithmeticException e) { // Catch if totalAmount has too many decimal places for longValueExact
+            log.error("Error converting total amount to cents for order {}: {}", newOrder.getOrderId(), e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid amount for payment.");
+        }
+        newOrder.setPayment(payment);
     }
 
     private static Address getShippingAddress(PlaceOrderRequest placeOrderRequest) {
