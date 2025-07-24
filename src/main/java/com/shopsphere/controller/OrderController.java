@@ -3,7 +3,7 @@ package com.shopsphere.controller;
 import com.shopsphere.config.CustomUserDetails;
 import com.shopsphere.dto.OrderResponse;
 import com.shopsphere.dto.PlaceOrderRequest;
-import com.shopsphere.model.OrderStatus;
+import com.shopsphere.model.enums.OrderStatus;
 import com.shopsphere.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,5 +1,6 @@
 package com.shopsphere.model;
 
+import com.shopsphere.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

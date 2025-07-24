@@ -1,7 +1,7 @@
 package com.shopsphere.dto;
 
-import com.shopsphere.model.OrderStatus;
-import com.shopsphere.model.PaymentStatus;
+import com.shopsphere.model.enums.OrderStatus;
+import com.shopsphere.model.enums.PaymentStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

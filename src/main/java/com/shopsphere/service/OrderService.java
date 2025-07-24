@@ -1,11 +1,12 @@
 package com.shopsphere.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopsphere.dto.OrderItemResponse;
 import com.shopsphere.dto.OrderResponse;
 import com.shopsphere.dto.PlaceOrderRequest;
 import com.shopsphere.event.OrderPlacedEvent;
 import com.shopsphere.model.*;
+import com.shopsphere.model.enums.OrderStatus;
+import com.shopsphere.model.enums.PaymentStatus;
 import com.shopsphere.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
