@@ -1,13 +1,12 @@
 package com.shopsphere.controller;
 
-import com.shopsphere.config.CustomUserDetails;
+import com.shopsphere.config.security.CustomUserDetails;
 import com.shopsphere.dto.AddToCartRequest;
 import com.shopsphere.dto.CartResponse;
 import com.shopsphere.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 

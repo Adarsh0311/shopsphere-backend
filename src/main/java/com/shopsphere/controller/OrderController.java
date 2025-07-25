@@ -1,6 +1,6 @@
 package com.shopsphere.controller;
 
-import com.shopsphere.config.CustomUserDetails;
+import com.shopsphere.config.security.CustomUserDetails;
 import com.shopsphere.dto.OrderResponse;
 import com.shopsphere.dto.PlaceOrderRequest;
 import com.shopsphere.model.enums.OrderStatus;

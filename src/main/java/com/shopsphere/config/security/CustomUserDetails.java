@@ -1,4 +1,4 @@
-package com.shopsphere.config;
+package com.shopsphere.config.security;
 
 import com.shopsphere.model.User;
 import lombok.Getter;
@@ -7,7 +7,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
     @Getter

@@ -3,6 +3,7 @@ package com.shopsphere.consumer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopsphere.dto.OrderResponse;
+import com.shopsphere.service.SnsMessagePublisherService;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 @RequiredArgsConstructor
 public class OrderMessageConsumerService {
     private final ObjectMapper objectMapper;
-    // private final SnsMessagePublisherService snsMessagePublisherService; // Will be injected later for SNS
+    private final SnsMessagePublisherService snsMessagePublisherService;
 
     /**
      * Listens to messages from the SQS order processing queue.
@@ -28,7 +29,8 @@ public class OrderMessageConsumerService {
             OrderResponse orderResponse = objectMapper.readValue(message, OrderResponse.class);
             log.info("Successfully parsed order message for Order ID: {}", orderResponse.getOrderId());
 
-            //TODO: implement SNS for email notifications
+
+            sendOrderConfirmationEmail(orderResponse);
 
         } catch (JsonProcessingException e) {
             log.error("Failed to parse SQS message JSON for order confirmation: {}", e.getMessage(), e);
@@ -36,5 +38,32 @@ public class OrderMessageConsumerService {
         } catch (Exception e) {
             log.error("Error processing SQS message for order confirmation: {}", e.getMessage(), e);
         }
+    }
+
+    private void sendOrderConfirmationEmail(OrderResponse orderResponse) throws JsonProcessingException {
+        log.info("Request for order confirmation to SNS for Order ID: {}", orderResponse.getOrderId());
+        String emailSubjet = "ShopSphere Order Confirmation - Order ID: " + orderResponse.getOrderId();
+        String emailBody = String.format(
+                """
+                Dear %s,
+                
+                Your Order has been placed successfully.
+                Total Amount: $%.2f
+                Status: %s
+                Items: %s
+                
+                Thank you for shopping.
+                
+                Regards,
+                ShopSphere.
+                """
+                , orderResponse.getUsername()
+                ,orderResponse.getTotalAmount()
+                ,orderResponse.getStatus()
+                , objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(orderResponse.getItems())
+        );
+
+        snsMessagePublisherService.publishOrderConfirmation(emailSubjet, emailBody);
+        log.info("Published order confirmation to SNS for Order ID: {}", orderResponse.getOrderId());
     }
 }

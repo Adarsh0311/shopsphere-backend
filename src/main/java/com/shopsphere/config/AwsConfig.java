@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 @Configuration
-public class SqsConfig {
+public class AwsConfig {
     @Value("${cloud.aws.region.static}")
     private String region;
 
@@ -22,15 +22,10 @@ public class SqsConfig {
 
     @Bean
     public SqsClient sqsClient() {
-        AwsBasicCredentials credentials = AwsBasicCredentials.create(
-                accessKey,
-                secretKey
-        );
          return SqsClient.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .credentialsProvider(StaticCredentialsProvider.create(getCredentials()))
                 .build();
-
 //        SqsClient.builder()
 //                .region(Region.of(region))
         // This will tell AWS to look for AWS_ACCESS_KEY_ID and SECRET in your environment
@@ -38,5 +33,18 @@ public class SqsConfig {
 //                .build();
 
 
+    }
+
+    @Bean
+    public SnsClient snsClient() {
+
+        return SnsClient.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(getCredentials()))
+                .build();
+    }
+
+    private AwsBasicCredentials getCredentials() {
+        return AwsBasicCredentials.create(accessKey, secretKey);
     }
 }

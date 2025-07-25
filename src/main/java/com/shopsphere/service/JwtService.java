@@ -1,6 +1,6 @@
 package com.shopsphere.service;
 
-import com.shopsphere.config.CustomUserDetails;
+import com.shopsphere.config.security.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

@@ -1,6 +1,6 @@
 package com.shopsphere.service;
 
-import com.shopsphere.config.CustomUserDetails;
+import com.shopsphere.config.security.CustomUserDetails;
 import com.shopsphere.dto.JwtAuthResponse;
 import com.shopsphere.dto.LoginRequest;
 import com.shopsphere.dto.RegisterRequest;
@@ -14,13 +14,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor

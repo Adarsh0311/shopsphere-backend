@@ -1,6 +1,5 @@
-package com.shopsphere.config;
+package com.shopsphere.config.security;
 
-import com.shopsphere.config.security.JwtAuthenticationFilter;
 import com.shopsphere.model.User;
 import com.shopsphere.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
