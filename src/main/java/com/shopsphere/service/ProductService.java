@@ -22,28 +22,6 @@ public class ProductService {
     private final CategoryService categoryService;
 
     /**
-     * Converts Product entity to ProductResponse DTO.
-     * [NOTE] Use a dedicated mapper class (like MapStruct or ModelMapper) for complex mappings,
-     * but for simple cases, direct conversion methods are fine.
-     */
-    private ProductResponse convertToDto(Product product) {
-        ProductResponse dto = new ProductResponse();
-        dto.setProductId(product.getProductId());
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setPrice(product.getPrice());
-        dto.setStockQuantity(product.getStockQuantity());
-        dto.setImageUrl(product.getImageUrl());
-        if (product.getCategory() != null) {
-            dto.setCategoryId(product.getCategory().getCategoryId());
-            dto.setCategoryName(product.getCategory().getName());
-        }
-        dto.setCreatedAt(product.getCreatedAt());
-        dto.setUpdatedAt(product.getUpdatedAt());
-        return dto;
-    }
-
-    /**
      * Fetches all products and converts to DTOs.
      * @return A list of ProductResponse DTOs.
      */
@@ -182,7 +160,38 @@ public class ProductService {
     }
 
     @Transactional
-    public int updateProductStockQuantity(String productId, Integer stockQuantity) {
-        return productRepository.updateProductStockQuantity(productId, stockQuantity);
+    public void updateProductStockQuantity(String productId, Integer stockQuantity) {
+        productRepository.updateProductStockQuantity(productId, stockQuantity);
     }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getProductsByCategory(String categoryId) {
+        return productRepository.findAllByCategoryCategoryId(categoryId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    /**
+     * Converts Product entity to ProductResponse DTO.
+     * [NOTE] Use a dedicated mapper class (like MapStruct or ModelMapper) for complex mappings,
+     * but for simple cases, direct conversion methods are fine.
+     */
+    private ProductResponse convertToDto(Product product) {
+        ProductResponse dto = new ProductResponse();
+        dto.setProductId(product.getProductId());
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setPrice(product.getPrice());
+        dto.setStockQuantity(product.getStockQuantity());
+        dto.setImageUrl(product.getImageUrl());
+        if (product.getCategory() != null) {
+            dto.setCategoryId(product.getCategory().getCategoryId());
+            dto.setCategoryName(product.getCategory().getName());
+        }
+        dto.setCreatedAt(product.getCreatedAt());
+        dto.setUpdatedAt(product.getUpdatedAt());
+        return dto;
+    }
+
 }

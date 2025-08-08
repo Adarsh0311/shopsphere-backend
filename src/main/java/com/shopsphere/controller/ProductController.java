@@ -74,4 +74,10 @@ public class ProductController {
         List<ProductResponse> products = productService.getLowStockProducts(threshold);
         return ResponseEntity.ok(products);
     }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable String categoryId) {
+        List<ProductResponse> products = productService.getProductsByCategory(categoryId);
+        return ResponseEntity.ok(products);
+    }
 }

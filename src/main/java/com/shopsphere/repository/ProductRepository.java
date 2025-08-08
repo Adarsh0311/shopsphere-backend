@@ -28,4 +28,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     @Query("UPDATE Product p set p.stockQuantity = :stockQuantity WHERE p.productId = :productId")
     int updateProductStockQuantity(String productId, Integer stockQuantity);
 
+    List<Product> findAllByCategoryCategoryId(String categoryId);
+
 }
