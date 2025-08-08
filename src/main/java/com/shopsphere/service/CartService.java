@@ -32,21 +32,7 @@ public class CartService {
     private final ProductService productService;
     private final UserService userService;
 
-    /**
-     * Helper method to convert CartItem entity to CartItemResponse DTO.
-     */
-    private CartItemResponse convertToCartItemDto(CartItem cartItem) {
-        CartItemResponse dto = new CartItemResponse();
-        dto.setCartItemId(cartItem.getCartItemId());
-        dto.setProductId(cartItem.getProduct().getProductId());
-        dto.setProductName(cartItem.getProduct().getName()); // Access product name
-        dto.setProductImageUrl(cartItem.getProduct().getImageUrl()); // Access product image URL
-        dto.setQuantity(cartItem.getQuantity());
-        dto.setPriceAtAddition(cartItem.getPriceAtAddition());
-        dto.setItemTotal(cartItem.getPriceAtAddition().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
-        dto.setAddedAt(cartItem.getAddedAt());
-        return dto;
-    }
+
 
     /**
      * Helper method to convert Cart to CartResponse
@@ -206,6 +192,38 @@ public class CartService {
         cart.setUpdatedAt(LocalDateTime.now());
         cartRepository.save(cart);
         return convertToCartResponse(cart);
+    }
+
+    @Transactional
+    public CartResponse mergeCart(String userId, CartResponse cartResponse) {
+        Cart cart = getOrCreateCart(userId);
+
+        for (CartItemResponse item: cartResponse.getItems()) {
+            CartItem newItem = new CartItem();
+            newItem.setCart(cart);
+            newItem.setProduct(productService.getProductEntityById(item.getProductId()));
+            newItem.setQuantity(item.getQuantity());
+            newItem.setPriceAtAddition(item.getPriceAtAddition());
+            cartItemRepository.save(newItem);
+        }
+
+        return convertToCartResponse(cart);
+    }
+
+    /**
+     * Helper method to convert CartItem entity to CartItemResponse DTO.
+     */
+    private CartItemResponse convertToCartItemDto(CartItem cartItem) {
+        CartItemResponse dto = new CartItemResponse();
+        dto.setCartItemId(cartItem.getCartItemId());
+        dto.setProductId(cartItem.getProduct().getProductId());
+        dto.setProductName(cartItem.getProduct().getName()); // Access product name
+        dto.setProductImageUrl(cartItem.getProduct().getImageUrl()); // Access product image URL
+        dto.setQuantity(cartItem.getQuantity());
+        dto.setPriceAtAddition(cartItem.getPriceAtAddition());
+        dto.setItemTotal(cartItem.getPriceAtAddition().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+        dto.setAddedAt(cartItem.getAddedAt());
+        return dto;
     }
 
 }

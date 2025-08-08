@@ -82,4 +82,13 @@ public class CartController {
         CartResponse cart = cartService.clearCart(userDetails.getUserId());
         return ResponseEntity.ok(cart);
     }
+
+    /**
+     * Used to merge local cart with the database when a user logs in
+     */
+    @PostMapping("/merge")
+    public ResponseEntity<CartResponse> mergeCart(@AuthenticationPrincipal CustomUserDetails userDetails, CartResponse cart) {
+        CartResponse cartResponse = cartService.mergeCart(userDetails.getUserId(), cart);
+        return ResponseEntity.ok(cartResponse);
+    }
 }

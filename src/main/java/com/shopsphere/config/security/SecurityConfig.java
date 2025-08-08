@@ -88,8 +88,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                        .requestMatchers("/api/auth/**", "/error").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/orders/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(
                         session -> session
