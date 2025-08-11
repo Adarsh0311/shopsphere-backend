@@ -56,7 +56,7 @@ public class StripePaymentService {
     }
 
     private PaymentIntent createPaymentIntent(User user, PlaceOrderRequest placeOrderRequest, BigDecimal totalAmount) throws StripeException {
-        long amountInCents = totalAmount.multiply(BigDecimal.valueOf(100)).longValueExact();
+        long amountInCents = totalAmount.multiply(BigDecimal.valueOf(100)).longValue();
 
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(amountInCents)

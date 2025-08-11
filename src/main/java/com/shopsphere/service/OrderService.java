@@ -75,6 +75,12 @@ public class OrderService {
 
         }
 
+        //TODO: need to implement tax logic and add as separate column fields
+        // For now adding simple 8% tax in total amount and 10$ shipping
+        //BigDecimal shippingCost = totalAmount.longValueExact() >= 35 ? BigDecimal.ZERO : BigDecimal.valueOf(10);
+        totalAmount = totalAmount.multiply(BigDecimal.valueOf(0.08));
+        //totalAmount = totalAmount.add(shippingCost);
+
         newOrder.setTotalAmount(totalAmount);
 
         //Address handling for order (shipping)
