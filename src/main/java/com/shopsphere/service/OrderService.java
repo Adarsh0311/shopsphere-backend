@@ -147,6 +147,18 @@ public class OrderService {
     }
 
     /**
+     * Get all orders for admin purposes.
+     * @return List of all orders.
+     */
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        return orders.stream()
+                .map(this::convertToOrderDto)
+                .toList();
+    }
+
+    /**
      * Update the status of an order.
      * @param orderId The ID of the order.
      * @param newStatus The new status string.

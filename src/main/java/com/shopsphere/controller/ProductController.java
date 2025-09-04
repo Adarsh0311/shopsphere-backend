@@ -1,16 +1,12 @@
 package com.shopsphere.controller;
 
-import com.shopsphere.dto.ProductRequest;
 import com.shopsphere.dto.ProductResponse;
 import com.shopsphere.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 
 import java.math.BigDecimal;
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -32,28 +28,6 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
-    @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest productRequest) { // Changed to ProductRequest
-        ProductResponse createdProduct = productService.createProduct(productRequest); // Changed to ProductRequest
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdProduct.getProductId())
-                .toUri();
-        return ResponseEntity.created(location).body(createdProduct);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> updateProduct(@PathVariable String id, @RequestBody ProductRequest productRequest) { // Changed to ProductRequest
-        ProductResponse updatedProduct = productService.updateProduct(id, productRequest); // Changed to ProductRequest
-        return ResponseEntity.ok(updatedProduct);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
-    }
 
     @GetMapping("/search/name")
     public ResponseEntity<ProductResponse> getProductByName(@RequestParam String name) {

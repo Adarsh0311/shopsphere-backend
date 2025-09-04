@@ -19,6 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -59,6 +63,35 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public User registerAdmin(RegisterRequest request) {
+        // Basic validation to check for existing username/email
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already taken!");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use!");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhoneNumber(request.getPhoneNumber());
+
+        // Assign the ROLE_ADMIN to the user
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Admin role not found!"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(adminRole);
+        user.setRoles(roles);
+
+        User savedUser = userRepository.save(user);
+        return savedUser;
+    }
+
     @Transactional(readOnly = true)
     public JwtAuthResponse login(LoginRequest loginRequest) {
         Authentication authenticate = authenticationManager
@@ -75,7 +108,8 @@ public class UserService {
                 "Bearer",
                 customUserDetails.getUserId(),
                 customUserDetails.getUsername(),
-                customUserDetails.getEmail()
+                customUserDetails.getEmail(),
+                customUserDetails.getAuthorities().stream().findFirst().get().getAuthority()
         );
     }
 
@@ -94,6 +128,25 @@ public class UserService {
     public User findById(String userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with userId: " + userId));
+    }
+
+    /**
+     * Get all users for admin purposes.
+     * @return List of all users.
+     */
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    /**
+     * Get user by ID for admin purposes.
+     * @param userId The user ID.
+     * @return The user entity.
+     */
+    @Transactional(readOnly = true)
+    public User getUserById(String userId) {
+        return findById(userId);
     }
 
 }
