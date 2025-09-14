@@ -24,7 +24,7 @@ public class AwsConfig {
     public SqsClient sqsClient() {
          return SqsClient.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(getCredentials()))
+//                .credentialsProvider(StaticCredentialsProvider.create(getCredentials()))
                 .build();
 //        SqsClient.builder()
 //                .region(Region.of(region))
@@ -40,7 +40,7 @@ public class AwsConfig {
 
         return SnsClient.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(getCredentials()))
+//                .credentialsProvider(StaticCredentialsProvider.create(getCredentials()))
                 .build();
     }
 
